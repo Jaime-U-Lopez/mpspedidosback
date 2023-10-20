@@ -72,7 +72,6 @@ public class ClientesService  implements IClientesService {
     }
 
 
-
     @Override
     public List<ClientesEntity> getAllClientes() {
         return clientesRepository.findAll();
@@ -140,10 +139,10 @@ public class ClientesService  implements IClientesService {
             Sheet sheet = workbook.getSheetAt(0); // Suponiendo que los datos están en la primera hoja
             Row headerRow = sheet.getRow(0);
             if (headerRow != null && headerRow.getPhysicalNumberOfCells() > 0) {
-                // Lista para almacenar los nombres de las columnas en el archivo
+
                 List<String> columnasEnArchivo = new ArrayList<>();
 
-                // Itera a través de las celdas de la fila de encabezados
+
                 for (Cell cell : headerRow) {
                     columnasEnArchivo.add(cell.getStringCellValue());
                 }

@@ -13,7 +13,7 @@ public class PedidosEntity {
 
 
 
-    public static  Integer contador=1;
+    public static  Integer contador=1000;
 
 
     @Id
@@ -60,6 +60,7 @@ public class PedidosEntity {
 private String correoComercial;
     private String formaDePago;
     public PedidosEntity() {
+        contador++;
     }
 
     public PedidosEntity(String nombreComercial, Long dni, Integer valorUnitario,
@@ -140,5 +141,9 @@ private String correoComercial;
 
     public void setTipoDeNegocio(String tipoDeNegocio) {
         this.tipoDeNegocio = tipoDeNegocio;
+    }
+
+    public static Integer getContador() {
+        return contador;
     }
 }

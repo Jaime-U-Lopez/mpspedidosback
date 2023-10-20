@@ -53,8 +53,10 @@ public class PedidosService implements IPedidosService {
        String estado= pedidoDtoRequest.getEstado();
         GeneradorCodigoUnico generador = new GeneradorCodigoUnico();
 
-       Integer numeroPedidoinicial= generador.generarNuevoCodigo();
-        Integer numeroPedido= numeroPedidoinicial;
+
+       PedidosEntity pedidosEntity2= new PedidosEntity();
+
+        Integer numeroPedido= pedidosEntity2.getContador();
        double porcentaIva=0.19;
 
 
@@ -150,10 +152,7 @@ public class PedidosService implements IPedidosService {
             pedido.setEstado(pedidoConfirmarDtoRequest.getEstado());
             pedido.setEvento(pedidoConfirmarDtoRequest.getEvento());
             pedido.setFechaCreacion(pedidosConfiDtoRequest.getFechaCreacion());
-
-
             pedido.setCorreoComercial(pedidoConfirmarDtoRequest.getCorreoAsesor());
-
             pedidosEntityListUpdate.add(pedido);
 
         }
