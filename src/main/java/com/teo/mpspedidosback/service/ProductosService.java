@@ -220,13 +220,14 @@ public class ProductosService implements IProductosService {
 
         Set<String> marcasYaAgregadas = new HashSet<>();
         List<ProductosDtoResponse> productosDtoResponses = productosEntities.stream()
-                .filter(entity -> !marcasYaAgregadas.contains(entity.getMarca())) // Filtra las marcas no agregadas
+                .filter(entity -> !marcasYaAgregadas.contains(entity.getMarca()))
                 .map(entity -> {
                     ProductosDtoResponse dto = new ProductosDtoResponse();
                     dto.setMarca(entity.getMarca());
-                    marcasYaAgregadas.add(entity.getMarca()); // Agrega la marca al conjunto
+                    marcasYaAgregadas.add(entity.getMarca());
                     return dto;
                 })
+                .sorted(Comparator.comparing(ProductosDtoResponse::getMarca))
                 .collect(Collectors.toList());
 
 
