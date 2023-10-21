@@ -62,6 +62,10 @@ public class PedidosController {
         return ResponseEntity.ok(pedidosService.getAllPedidosAcumulados());
     }
 
+    @GetMapping("conteo/")
+    public ResponseEntity<Integer> getConteoProductos(){
+        return ResponseEntity.ok(pedidosService.conteoPedidos());
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<PedidosEntity> getPedidos(@PathVariable Long id){

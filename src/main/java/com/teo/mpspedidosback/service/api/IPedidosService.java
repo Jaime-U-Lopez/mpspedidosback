@@ -28,7 +28,7 @@ public interface IPedidosService {
 
    void enviarCorreo(PedidoCamEstadoDtoRequest pedidoCamEstadoDtoRequest);
 
-
+    Integer conteoPedidos();
     List<PedidoAcumuladoDtoResponse> calcularSumaPedidosSuperiorAValor(Integer valor);
 
 }

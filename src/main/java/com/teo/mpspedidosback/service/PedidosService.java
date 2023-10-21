@@ -500,6 +500,35 @@ public class PedidosService implements IPedidosService {
 }
 
     @Override
+    public Integer conteoPedidos() {
+
+        List<PedidosEntity> pedidosEntityList = pedidosRepository.findAll();
+        List<PedidosEntity> pedidosUnicos = new ArrayList<>();
+        List<PedidosEntity> consultaByTope = new ArrayList<>();
+
+        for (PedidosEntity pedidos : pedidosEntityList) {
+            boolean encontrado = false;
+            for (PedidosEntity pedidoAcumulado : pedidosUnicos) {
+                if (pedidoAcumulado.getCodigoInterno().equals(pedidos.getCodigoInterno())) {
+
+                    encontrado = true;
+                    break;
+                }
+            }
+
+            if (!encontrado) {
+                // No se encontró un pedido acumulado con el mismo código interno, crea uno nuevo
+                PedidosEntity nuevoPedidoAcumulado = new PedidosEntity();
+                nuevoPedidoAcumulado.setCodigoInterno(pedidos.getCodigoInterno());
+
+                pedidosUnicos.add(nuevoPedidoAcumulado);
+            }
+        }
+
+        return pedidosUnicos.size();
+    }
+
+    @Override
     public List<PedidoAcumuladoDtoResponse> calcularSumaPedidosSuperiorAValor(Integer valor) {
 
         List<PedidosEntity> pedidosEntityList = pedidosRepository.findAll();
