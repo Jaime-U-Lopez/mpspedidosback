@@ -39,21 +39,29 @@ public class PedidosController {
     public ResponseEntity<Map<String, String>> createCorreoPedidos(@Valid @RequestBody PedidoCamEstadoDtoRequest pedidoCamEstadoDtoRequest){
         pedidosService.enviarCorreo(pedidoCamEstadoDtoRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY,Constants.CREADO_PEDIDOS_INICIAL));
+                Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY,Constants.CORREO_ENVIADO_CON_EXITO));
     }
+
+    @PostMapping("emailCartera/")
+    public ResponseEntity<Map<String, String>> createCorreoCartera(@Valid @RequestBody PedidoEmailCarteraDtoRequest pedidoEmailCarteraDtoRequest){
+        pedidosService.enviarCorreoCartera(pedidoEmailCarteraDtoRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY,Constants.CORREO_ENVIADO_CON_EXITO));
+    }
+
 
     @PatchMapping("/")
     public  ResponseEntity<Map<String, String>>UpdatePedidosConfirmacion(@Valid @RequestBody PedidoConfirmarDtoRequest pedidoConfirmarDtoRequest){
         pedidosService.updatePedidosConfirmacion(pedidoConfirmarDtoRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY,Constants.ENTIDAD_CREADO_MENSAJE));
+                Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY,Constants.PEDIDOS_UPDATE_CON_EXITO));
     }
 
     @PatchMapping("addProduct/")
     public  ResponseEntity<Map<String, String>>UpdatePedidosSinConfirmar(@Valid @RequestBody PedidoDtoUpdateRequest pedidoDtoUpdateRequest){
         pedidosService.updatePedidos(pedidoDtoUpdateRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY,Constants.ENTIDAD_CREADO_MENSAJE));
+                Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY,Constants.PEDIDOS_UPDATE_CON_EXITO));
     }
 
 

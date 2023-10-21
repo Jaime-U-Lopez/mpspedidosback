@@ -27,6 +27,7 @@ public interface IPedidosService {
     void deleteByCodigoPedido(String codigo);
 
    void enviarCorreo(PedidoCamEstadoDtoRequest pedidoCamEstadoDtoRequest);
+    void enviarCorreoCartera(PedidoEmailCarteraDtoRequest pedidoEmailCarteraDtoRequest);
 
     Integer conteoPedidos();
     List<PedidoAcumuladoDtoResponse> calcularSumaPedidosSuperiorAValor(Integer valor);

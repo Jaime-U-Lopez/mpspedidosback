@@ -15,6 +15,7 @@ public class Constants {
     public static final Long EMPLEADO_ROL_ID = 2L;
     public static final Long PROPIETARIO_ROL_ID = 3l;
     public static final Long ADMINISTRADOR_ROL_ID = 4l;
+    public static final String CORREO_ENVIADO_CON_EXITO = "Correo enviado con exito.";
 
     public static final String CORREO_MAL_FORMULADO_EXCEPTION = "Correo mal formulado, por favor ingrese un correo valido.";
     public static final String CONTRASEÑA_ERRADA = "la contraseña ingresada esta errada, por favor valide nuevamente .";
@@ -39,6 +40,8 @@ public class Constants {
     public static final String CREADO_PEDIDOS_INICIAL = "Creado satisfactoriamente el pedido exitosamente : ";
     public static final String USUARIO_CREADOS_MENSAJE = "Creado satisfactoriamente los registros Existoso Usuarios: "+ UsuariosService.registrosExitosos + ", Fallidos sin crear : " +UsuariosService.registrosFallidos + ", Errores generdos : " + UsuariosService.errores;
 
+
+    public static final String PEDIDOS_UPDATE_CON_EXITO = "Pedidos actualizados con exito  ";
 
     public static final String ENTIDAD_CREADO_MENSAJE = "Creado satisfactoriamente los registros Existoso Productos: "+ ProductosService.registrosExitosos + ", Fallidos sin crear : " +ProductosService.registrosFallidos + ", Errores generdos : " + ProductosService.errores;
     public static final String ENTIDADES_CREADAS_MENSAJE = "Creado satisfactoriamente los registros Existoso Clientes: "+ ClientesService.registrosExitosos + ", Fallidos sin crear : " +ClientesService.registrosFallidos +

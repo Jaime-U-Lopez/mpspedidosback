@@ -10,10 +10,14 @@ import com.teo.mpspedidosback.repository.IProductosRepository;
 import com.teo.mpspedidosback.service.api.IEmailService;
 import com.teo.mpspedidosback.service.api.IPedidosService;
 import jakarta.validation.constraints.Email;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import javax.mail.*;
 import java.lang.reflect.Array;
@@ -21,6 +25,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 import javax.mail.internet.*;
@@ -51,12 +56,12 @@ public class PedidosService implements IPedidosService {
        Long idCliente= pedidoDtoRequest.getIdCliente();
        String codigoInterno= pedidoDtoRequest.getCodigoInterno();
        String estado= pedidoDtoRequest.getEstado();
-        GeneradorCodigoUnico generador = new GeneradorCodigoUnico();
+
 
 
        PedidosEntity pedidosEntity2= new PedidosEntity();
 
-        Integer numeroPedido= pedidosEntity2.getContador();
+        Integer numeroPedido=Integer.parseInt(pedidoDtoRequest.getCodigoInterno());
        double porcentaIva=0.19;
 
 
@@ -127,7 +132,10 @@ public class PedidosService implements IPedidosService {
             }
         }
 
+
+
         pedidosRepository.saveAll(pedidosEntityList);
+
     }
     @Override
     public void updatePedidosConfirmacion(PedidoConfirmarDtoRequest pedidoConfirmarDtoRequest) {
@@ -159,6 +167,13 @@ public class PedidosService implements IPedidosService {
 
         pedidosRepository.saveAll(pedidosEntityListUpdate);
 
+        PedidoEmailCarteraDtoRequest pedidoEmailCarteraDtoRequest =  new PedidoEmailCarteraDtoRequest ();
+
+        pedidoEmailCarteraDtoRequest.setCodigoInterno(pedidoConfirmarDtoRequest.getCodigoInterno());
+        pedidoEmailCarteraDtoRequest.setEstado(pedidoConfirmarDtoRequest.getEstado());
+        pedidoEmailCarteraDtoRequest.setCorreo("carteramatch@mps.com.co");
+
+        enviarCorreoCartera(pedidoEmailCarteraDtoRequest);
 
 
     }
@@ -460,7 +475,7 @@ public class PedidosService implements IPedidosService {
 
 
         if(estado.equals("aprobado")) {
-            emailEntity.setAsunto("MPS Solicitud de Orden N° : " + orden);
+            emailEntity.setAsunto("MPS Confirmada Solicitud de Orden N° : " + orden);
         }else{
             emailEntity.setAsunto("MPS (Cancelado) Solicitud de Orden N° : " + orden);
         }
@@ -474,7 +489,9 @@ public class PedidosService implements IPedidosService {
             Message emailMessage = emailService.createEmail(emailSession, emailEntity);
 
             List<String>destinatariosCco=new ArrayList<>();
-            destinatariosCco.add("or4846@hotmail.com");
+            destinatariosCco.add("ejecutivosmatch@mps.com.co");
+
+
 
             if(!correoAsesor.equals("") ){
                 destinatariosCco.add(correoAsesor);
@@ -498,6 +515,186 @@ public class PedidosService implements IPedidosService {
         }
 
 }
+
+
+    @Override
+    public void enviarCorreoCartera(PedidoEmailCarteraDtoRequest pedidoEmailCarteraDtoRequest) {
+
+
+        Locale localeColombia = new Locale("es", "CO");
+        NumberFormat formato = NumberFormat.getNumberInstance(localeColombia);
+        formato.setMaximumFractionDigits(2);
+
+        // Configurar el número de decimales deseados
+        formato.setMaximumFractionDigits(2);
+
+
+        String carteraOpcional="";
+        String estadoCorreo= pedidoEmailCarteraDtoRequest.getEstado();
+        String correoCartera=pedidoEmailCarteraDtoRequest.getCorreo();
+        String ordenSTr=pedidoEmailCarteraDtoRequest.getCodigoInterno();
+        Integer orden=Integer.parseInt(ordenSTr);
+
+        List<PedidosEntity> pedidosEntityList= pedidosRepository.findByCodigoInterno(pedidoEmailCarteraDtoRequest.getCodigoInterno());
+        List<PedidosEntity> savePedidosEntity= new ArrayList<>();
+        List<PedidoEmailDtoResponse> productos = new ArrayList<>() ;
+        List<PedidoEmailDBDtoResponse> datosBasicos = new ArrayList<>() ;
+
+try{
+    if(pedidosEntityList.isEmpty()){
+        throw new ExceptionGeneral("El codigo Interno Proporcionado No posee registros ");
+    }
+
+
+    // asunto
+
+    for ( PedidosEntity pedidosEntity  :pedidosEntityList) {
+        pedidosEntity.setEstado(estadoCorreo);
+
+        PedidoEmailDBDtoResponse pedidoEmailDBDtoResponse=new PedidoEmailDBDtoResponse();
+        pedidoEmailDBDtoResponse.setDni(pedidosEntity.getDni());
+        pedidoEmailDBDtoResponse.setNombreComercial(pedidosEntity.getNombreComercial());
+        pedidoEmailDBDtoResponse.setNetoApagar(pedidosEntity.getNetoApagar());
+        pedidoEmailDBDtoResponse.setCorreoElectronico(pedidosEntity.getCorreoElectronico());
+        pedidoEmailDBDtoResponse.setCelular(pedidosEntity.getCelular());
+        pedidoEmailDBDtoResponse.setDireccion(pedidosEntity.getDireccion());
+        pedidoEmailDBDtoResponse.setFormaDePago(pedidosEntity.getFormaDePago());
+        pedidoEmailDBDtoResponse.setPersonaContacto(pedidosEntity.getPersonaContacto());
+        pedidoEmailDBDtoResponse.setTelefonoFijo(pedidosEntity.getTelefonoFijo());
+        pedidoEmailDBDtoResponse.setValorTotal(pedidosEntity.getValorTotalPedido());
+
+
+
+        if (!datosBasicos.contains(pedidoEmailDBDtoResponse)) {
+            datosBasicos.add(pedidoEmailDBDtoResponse);
+        }
+
+        //productos
+        PedidoEmailDtoResponse pedidoEmailDtoResponse= new PedidoEmailDtoResponse();
+        pedidoEmailDtoResponse.setNumeroPedido(pedidosEntity.getNumeroPedido());
+        pedidoEmailDtoResponse.setCantidad(pedidosEntity.getCantidad());
+        pedidoEmailDtoResponse.setMarca(pedidosEntity.getMarca());
+        pedidoEmailDtoResponse.setNumerodeparte(pedidosEntity.getNumerodeparte());
+        pedidoEmailDtoResponse.setNombreArticulo(pedidosEntity.getDescripcion());
+        pedidoEmailDtoResponse.setValorUnitario(pedidosEntity.getValorUnitario());
+        productos.add(pedidoEmailDtoResponse);
+
+        savePedidosEntity.add(pedidosEntity);
+    }
+    pedidosRepository.saveAll(savePedidosEntity);
+    EmailEntity emailEntity= new EmailEntity();
+
+
+    StringBuilder stringBuilder = new StringBuilder();
+    stringBuilder.append("<html><body>");
+    stringBuilder.append("<p style='font-size: 13px; color: #333;'>Buen día,</p>");
+    stringBuilder.append("<br>");
+    stringBuilder.append("<p style='font-size: 13px; color: #333;'>Enviamos detalle del pedido:</p>");
+    stringBuilder.append("<p style='font-size: 13px; color: #333;'>");
+
+    for (PedidoEmailDBDtoResponse datos: datosBasicos) {
+        stringBuilder.append("<br>");
+        stringBuilder.append("<p style='font-size: 13px; color: #333;'>Nit o CC = " + datos.getDni() + "</p>");
+        stringBuilder.append("<p style='font-size: 13px; color: #333;'>Nombre Comercial = " + datos.getNombreComercial() + "</p>");
+        stringBuilder.append("<p style='font-size: 13px; color: #333;'>Correo Electrónico = " + datos.getCorreoElectronico() + "</p>");
+        stringBuilder.append("<p style='font-size: 13px; color: #333;'>Celular = " + datos.getCelular() + "</p>");
+        stringBuilder.append("<p style='font-size: 13px; color: #333;'>Dirección = " + datos.getDireccion() + "</p>");
+        stringBuilder.append("<p style='font-size: 13px; color: #333;'>Forma de Pago = " + datos.getFormaDePago() + "</p>");
+        stringBuilder.append("<p style='font-size: 13px; color: #333;'>Persona de Contacto = " + datos.getPersonaContacto() + "</p>");
+        stringBuilder.append("<p style='font-size: 13px; color: #333;'>Teléfono Fijo = " + datos.getTelefonoFijo() + "</p>");
+        stringBuilder.append("<p style='font-size: 13px; color: #333;'>Valor Total = $ " +formato.format( datos.getValorTotal())+ "</p>");
+        stringBuilder.append("<p style='font-size: 13px; color: #333;'>Neto a pagar = $ " + formato.format(datos.getNetoApagar())  + "</p>");
+        stringBuilder.append("<br>");
+        stringBuilder.append("</p>");
+
+
+    }
+    stringBuilder.append("<p style='font-size: 13px; color: #333;'>Datos productos :</p>");
+    for (PedidoEmailDtoResponse producto:productos) {
+
+
+        stringBuilder.append("<p style='font-size: 13px; color: #333;'>N° Pedido: " + producto.getNumeroPedido() + "</p>");
+        stringBuilder.append("<p style='font-size: 13px; color: #333;'>N° de Parte: " + producto.getNumerodeparte() + "</p>");
+        stringBuilder.append("<p style='font-size: 13px; color: #333;'>Nombre del Artículo: " + producto.getNombreArticulo() + "</p>");
+        stringBuilder.append("<p style='font-size: 13px; color: #333;'>Marca: " + producto.getMarca() + "</p>");
+        stringBuilder.append("<p style='font-size: 13px; color: #333;'>Cantidad: " + producto.getCantidad() + "</p>");
+        stringBuilder.append("<p style='font-size: 13px; color: #333;'>Valor Unitario: " + formato.format(producto.getValorUnitario()) + "</p>");
+        stringBuilder.append("<br>");
+        stringBuilder.append("</body></html>");
+
+    }
+
+
+    if(!correoCartera.equals("") ){
+
+        if ( esCorreoElectronicoValido(correoCartera)) {
+            emailEntity.setDestinatario(correoCartera);
+        } else {
+            throw new ExceptionGeneral("El correo del Cartera  no es valido en su estructura)");
+        }
+
+
+    }else {
+
+        throw new ExceptionGeneral("El correo del Cartera  no es valido, (no" +
+                " puede llegar vacio ni separadao por ;: solo por ,)");
+    }
+
+
+    if(estadoCorreo.equals("Confirmado")) {
+        emailEntity.setAsunto("MPS (PendienteAprobacion) Solicitud de Orden N° : " + orden);
+    }else{
+        emailEntity.setAsunto("MPS (EstadoErrado) Solicitud de Orden N° : " + orden);
+    }
+    emailEntity.setCuerpoCorreo(stringBuilder.toString())   ;
+
+
+        try {
+            // Crear una sesión de correo electrónico
+            Session emailSession = configureEmailSession(emailEntity);
+
+            // Crear el mensaje de correo electrónico utilizando la sesión y los datos de la solicitud
+            Message emailMessage = emailService.createEmail(emailSession, emailEntity);
+
+            List<String>destinatariosCco=new ArrayList<>();
+
+           // destinatariosCco.add("or4846@gmail.com");
+            if(!carteraOpcional.equals("") ){
+                destinatariosCco.add(correoCartera);
+            }
+
+            // Configurar copia oculta (CCO o BCC)
+            if (destinatariosCco != null && !destinatariosCco.isEmpty()) {
+                Address[] ccoRecipients = new Address[destinatariosCco.size()];
+                for (int i = 0; i < destinatariosCco.size(); i++) {
+                    ccoRecipients[i] = new InternetAddress(destinatariosCco.get(i));
+                }
+                emailMessage.setRecipients(Message.RecipientType.BCC, ccoRecipients);
+            }
+
+            // Enviar el correo electrónico
+            emailService.sendEmail(emailMessage);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+
+
+        }catch (Exception e){
+
+            throw new IllegalArgumentException("error Envio correo los valores totales  esta null   o el correo esta mal escrito ",  e);
+
+        }
+    }
+
+
+    public static boolean esCorreoElectronicoValido(String correo) {
+        String expresionRegularCorreo = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+        Pattern pat = Pattern.compile(expresionRegularCorreo);
+        Matcher mat = pat.matcher(correo);
+        return mat.matches();
+    }
 
     @Override
     public Integer conteoPedidos() {
@@ -524,6 +721,7 @@ public class PedidosService implements IPedidosService {
                 pedidosUnicos.add(nuevoPedidoAcumulado);
             }
         }
+
 
         return pedidosUnicos.size();
     }
