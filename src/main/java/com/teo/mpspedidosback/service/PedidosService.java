@@ -9,6 +9,7 @@ import com.teo.mpspedidosback.repository.IPedidosRepository;
 import com.teo.mpspedidosback.repository.IProductosRepository;
 import com.teo.mpspedidosback.service.api.IEmailService;
 import com.teo.mpspedidosback.service.api.IPedidosService;
+import io.micrometer.common.util.StringUtils;
 import jakarta.validation.constraints.Email;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,10 +59,7 @@ public class PedidosService implements IPedidosService {
        String estado= pedidoDtoRequest.getEstado();
 
 
-
-       PedidosEntity pedidosEntity2= new PedidosEntity();
-
-        Integer numeroPedido=Integer.parseInt(pedidoDtoRequest.getCodigoInterno());
+        Integer numeroPedido=conteoPedidos()+1;
        double porcentaIva=0.19;
 
 
@@ -69,71 +67,68 @@ public class PedidosService implements IPedidosService {
 
         List<ProductosDtoRequest> productos = pedidoDtoRequest.getListaProductos();
 
-        for (ProductosDtoRequest producto : productos) {
+              for (ProductosDtoRequest producto : productos) {
 
-            Long idProducto = producto.getId();
-            Integer cantidad = producto.getCantidad();
+                  Long idProducto = producto.getId();
+                  Integer cantidad = producto.getCantidad();
 
-            Integer valorUnitario= producto.getValorUnitario();
+                  Integer valorUnitario= producto.getValorUnitario();
 
-            try {
-                Optional<ClientesEntity> clientesEntity = clientesRepository.findByNit(idCliente);
-                if (!clientesEntity.isPresent()) {
-                    throw new ExceptionGeneral("El cliente no registra en la base de datos");
-                }
+                  try {
+                      Optional<ClientesEntity> clientesEntity = clientesRepository.findByNit(idCliente);
+                      if (!clientesEntity.isPresent()) {
+                          throw new ExceptionGeneral("El cliente no registra en la base de datos");
+                      }
 
-                Long nit=  clientesEntity.get().getNit();
-                String nombreComercial=  clientesEntity.get().getNombre();
-                String correo=clientesEntity.get().getCorreoElectronico();
+                      Long nit=  clientesEntity.get().getNit();
+                      String nombreComercial=  clientesEntity.get().getNombre();
+                      String correo=clientesEntity.get().getCorreoElectronico();
 
-            Optional<ProductosEntity>  productosEntity=  productosRepository.findById(idProducto);
-            if(!productosEntity.isPresent()){
-                throw new ExceptionGeneral("el producto no registra en la base de datos ");
+                      Optional<ProductosEntity>  productosEntity=  productosRepository.findById(idProducto);
+                      if(!productosEntity.isPresent()){
+                          throw new ExceptionGeneral("el producto no registra en la base de datos ");
 
-            }
-            String clasificacionTributaria=  productosEntity.get().getClasificaciontributaria();
+                      }
+                      String clasificacionTributaria=  productosEntity.get().getClasificaciontributaria();
 
-            var ivaPorPedido=0.0;
-            if("GRAVADO".equals(clasificacionTributaria)){
-                ivaPorPedido = valorUnitario * porcentaIva * cantidad;
+                      var ivaPorPedido=0.0;
+                      if("GRAVADO".equals(clasificacionTributaria)){
+                          ivaPorPedido = valorUnitario * porcentaIva * cantidad;
 
-            }
-
-
-            var valorTotalPorPro= Long.valueOf (valorUnitario * cantidad);
-            var valorNetoPorProd= valorTotalPorPro + ivaPorPedido;
-
-            String numeroParte= productosEntity.get().getNumerodeparte();
-
-            String descripcion= productosEntity.get().getDescripcion();
-            String tipoNegocio= productosEntity.get().getTipoDeNegocio();
-            String marca=  productosEntity.get().getMarca();
-            String color=  productosEntity.get().getColor();
-            String stock =  productosEntity.get().getStock();
-            String preciominimocop= productosEntity.get().getPreciominimocop();
-            String preciominimousd= productosEntity.get().getPreciominimocop();
+                      }
 
 
+                      var valorTotalPorPro= Long.valueOf (valorUnitario * cantidad);
+                      var valorNetoPorProd= valorTotalPorPro + ivaPorPedido;
 
-            PedidosEntity pedidosEntity= new PedidosEntity(nombreComercial,nit,
-                    valorUnitario
-                    ,ivaPorPedido,estado,
-                    correo,codigoInterno,
-                    numeroParte,cantidad,
-                   descripcion,
-                    marca,color,stock,clasificacionTributaria,
-                    numeroPedido , tipoNegocio,
-                    preciominimocop, preciominimousd ,valorNetoPorProd, valorTotalPorPro
-            );
+                      String numeroParte= productosEntity.get().getNumerodeparte();
 
-            pedidosEntityList.add(pedidosEntity);
-            } catch (Exception e) {
-                throw new ExceptionGeneral("Nit  duplicado en la base de datos clientes  ");
-            }
-        }
+                      String descripcion= productosEntity.get().getDescripcion();
+                      String tipoNegocio= productosEntity.get().getTipoDeNegocio();
+                      String marca=  productosEntity.get().getMarca();
+                      String color=  productosEntity.get().getColor();
+                      String stock =  productosEntity.get().getStock();
+                      String preciominimocop= productosEntity.get().getPreciominimocop();
+                      String preciominimousd= productosEntity.get().getPreciominimocop();
+
+                      PedidosEntity pedidosEntity= new PedidosEntity(nombreComercial,nit,
+                              valorUnitario
+                              ,ivaPorPedido,estado,
+                              correo,codigoInterno,
+                              numeroParte,cantidad,
+                              descripcion,
+                              marca,color,stock,clasificacionTributaria,
+                              numeroPedido , tipoNegocio,
+                              preciominimocop, preciominimousd ,valorNetoPorProd, valorTotalPorPro
+                      );
+
+                      pedidosEntityList.add(pedidosEntity);
+                  } catch (Exception e) {
+                      throw new ExceptionGeneral("Nit  duplicado en la base de datos clientes o sin productos existen en bd "+e.getMessage());
+                  }
 
 
-
+              }
         pedidosRepository.saveAll(pedidosEntityList);
 
     }
@@ -145,7 +140,9 @@ public class PedidosService implements IPedidosService {
         List<PedidosEntity>   pedidosEntityList= pedidosRepository.findByCodigoInterno( pedidoConfirmarDtoRequest.getCodigoInterno());
         List<PedidosEntity> pedidosEntityListUpdate = new ArrayList<>();
 
-        for (var pedido :pedidosEntityList) {
+
+
+        for (PedidosEntity pedido :pedidosEntityList) {
 
             pedido.setPersonaContacto(pedidosConfiDtoRequest.getPersonaContacto());
             pedido.setDireccion(pedidosConfiDtoRequest.getDireccion());
@@ -161,20 +158,28 @@ public class PedidosService implements IPedidosService {
             pedido.setEvento(pedidoConfirmarDtoRequest.getEvento());
             pedido.setFechaCreacion(pedidosConfiDtoRequest.getFechaCreacion());
             pedido.setCorreoComercial(pedidoConfirmarDtoRequest.getCorreoAsesor());
+
             pedidosEntityListUpdate.add(pedido);
 
         }
 
         pedidosRepository.saveAll(pedidosEntityListUpdate);
+try {
+    PedidoEmailCarteraDtoRequest pedidoEmailCarteraDtoRequest =  new PedidoEmailCarteraDtoRequest ();
 
-        PedidoEmailCarteraDtoRequest pedidoEmailCarteraDtoRequest =  new PedidoEmailCarteraDtoRequest ();
+    pedidoEmailCarteraDtoRequest.setCodigoInterno(pedidoConfirmarDtoRequest.getCodigoInterno());
+    pedidoEmailCarteraDtoRequest.setEstado(pedidoConfirmarDtoRequest.getEstado());
+    pedidoEmailCarteraDtoRequest.setCorreo("carteramatch@mps.com.co");
 
-        pedidoEmailCarteraDtoRequest.setCodigoInterno(pedidoConfirmarDtoRequest.getCodigoInterno());
-        pedidoEmailCarteraDtoRequest.setEstado(pedidoConfirmarDtoRequest.getEstado());
-        pedidoEmailCarteraDtoRequest.setCorreo("carteramatch@mps.com.co");
+    enviarCorreoCartera(pedidoEmailCarteraDtoRequest);
+}catch (Exception e){
 
-        enviarCorreoCartera(pedidoEmailCarteraDtoRequest);
+    throw new ExceptionGeneral("Error con el envio del correo a cartera "+ e.getMessage());
 
+}
+        /*
+
+*/
 
     }
 
@@ -184,8 +189,7 @@ public class PedidosService implements IPedidosService {
         Long idCliente= pedidoDtoUpdateRequest.getIdCliente();
         String codigoInterno= pedidoDtoUpdateRequest.getCodigoInterno();
         String estado= pedidoDtoUpdateRequest.getEstado();
-
-        Integer numeroPedido= PedidosEntity.contador;
+        Integer numeroPedido=2;
         double porcentaIva=0.19;
         Optional<ClientesEntity>  clientesEntity =  clientesRepository.findByNit(idCliente);
         if(!clientesEntity.isPresent()){
@@ -203,6 +207,7 @@ public class PedidosService implements IPedidosService {
             String nombreComercial=  clientesEntity.get().getNombre();
             String correo=clientesEntity.get().getCorreoElectronico();
 
+          ;
             Optional<ProductosEntity>  productosEntity=  productosRepository.findById(idProducto);
             if(!productosEntity.isPresent()){
                 throw new ExceptionGeneral("el producto no registra en la base de datos ");
@@ -275,7 +280,7 @@ public class PedidosService implements IPedidosService {
                     pedidoDtoResponse.setTelefonoFijo(pedidoEntity.getTelefonoFijo());
                     pedidoDtoResponse.setCorreoElectronico(pedidoEntity.getCorreoElectronico());
                     pedidoDtoResponse.setCodigoInterno(pedidoEntity.getCodigoInterno());
-                    pedidoDtoResponse.setNumeroPedido(Integer.toBinaryString(pedidoEntity.getNumeroPedido()) );
+                    pedidoDtoResponse.setNumeroPedido(pedidoEntity.getNumeroPedido() );
                     pedidoDtoResponse.setNumerodeparte(pedidoEntity.getNumerodeparte());
                     pedidoDtoResponse.setMarca(pedidoEntity.getMarca());
                     pedidoDtoResponse.setDescripcion(pedidoEntity.getDescripcion());
@@ -524,7 +529,7 @@ public class PedidosService implements IPedidosService {
         Locale localeColombia = new Locale("es", "CO");
         NumberFormat formato = NumberFormat.getNumberInstance(localeColombia);
         formato.setMaximumFractionDigits(2);
-
+        Integer orden=0;
         // Configurar el número de decimales deseados
         formato.setMaximumFractionDigits(2);
 
@@ -532,10 +537,13 @@ public class PedidosService implements IPedidosService {
         String carteraOpcional="";
         String estadoCorreo= pedidoEmailCarteraDtoRequest.getEstado();
         String correoCartera=pedidoEmailCarteraDtoRequest.getCorreo();
-        String ordenSTr=pedidoEmailCarteraDtoRequest.getCodigoInterno();
-        Integer orden=Integer.parseInt(ordenSTr);
+
+
 
         List<PedidosEntity> pedidosEntityList= pedidosRepository.findByCodigoInterno(pedidoEmailCarteraDtoRequest.getCodigoInterno());
+
+
+
         List<PedidosEntity> savePedidosEntity= new ArrayList<>();
         List<PedidoEmailDtoResponse> productos = new ArrayList<>() ;
         List<PedidoEmailDBDtoResponse> datosBasicos = new ArrayList<>() ;
@@ -563,7 +571,7 @@ try{
         pedidoEmailDBDtoResponse.setTelefonoFijo(pedidosEntity.getTelefonoFijo());
         pedidoEmailDBDtoResponse.setValorTotal(pedidosEntity.getValorTotalPedido());
 
-
+        orden=pedidosEntity.getNumeroPedido();
 
         if (!datosBasicos.contains(pedidoEmailDBDtoResponse)) {
             datosBasicos.add(pedidoEmailDBDtoResponse);

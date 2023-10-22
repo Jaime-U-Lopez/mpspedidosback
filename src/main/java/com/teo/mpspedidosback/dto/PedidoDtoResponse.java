@@ -31,7 +31,7 @@ public class PedidoDtoResponse {
 
         private Integer cantidad;
         private Integer valorUnitario;
-        private String numeroPedido;
+        private Integer numeroPedido;
         private String descripcion;
         private String tipoDeNegocio;
         private Double iva;

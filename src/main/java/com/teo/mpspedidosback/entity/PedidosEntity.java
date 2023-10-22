@@ -12,10 +12,6 @@ import java.sql.Date;
 public class PedidosEntity {
 
 
-
-    public static  Integer contador=1000;
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -60,7 +56,7 @@ public class PedidosEntity {
 private String correoComercial;
     private String formaDePago;
     public PedidosEntity() {
-        contador++;
+
     }
 
     public PedidosEntity(String nombreComercial, Long dni, Integer valorUnitario,
@@ -143,7 +139,5 @@ private String correoComercial;
         this.tipoDeNegocio = tipoDeNegocio;
     }
 
-    public static Integer getContador() {
-        return contador;
-    }
+
 }

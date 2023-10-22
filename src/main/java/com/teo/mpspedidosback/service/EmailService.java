@@ -35,33 +35,13 @@ public class EmailService implements IEmailService {
         String username = "MPSMatch@mps.com.co";
         String password= "Sistemas-8245";
 
-/*
- String username = "freelancerjulopez@gmail.com";
-        String password= "jzed gwlu gbds pxiv";
- */
-
         Properties props = new Properties();
 
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.host", "smtp.office365.com");
-        props.put("mail.smtp.port", "587"); // Usar el puerto 587 para TLS (StartTLS)
-       // props.put("mail.smtp.ssl.enable", "true");
-
-
-// Si deseas utilizar SSL, descomenta estas líneas y establece el puerto a 465
-// props.put("mail.smtp.ssl.enable", "true");
-// props.put("mail.smtp.port", "465");
-
-
-       /*
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.host", "smtp.gmail.com");
         props.put("mail.smtp.port", "587");
 
-
-        */
         Session session = Session.getInstance(props, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(username,password);
@@ -70,7 +50,6 @@ public class EmailService implements IEmailService {
 
         return session;
     }
-
 
     @Override
     public void sendEmail( Message  message) {

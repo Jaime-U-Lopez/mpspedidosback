@@ -2,10 +2,10 @@ spring:
   datasource:
     #url: jdbc:sqlserver://localhost:1433;databaseName=controlPedidos
     #username: mps
-    #password: Aaa123456
+  #password: Aaa123456
 
   #hibernate:
-     #dialect: org.hibernate.dialect.SQLServer2019Dialect
+    #dialect: org.hibernate.dialect.SQLServer2019Dialect
 
 
   #spring:
