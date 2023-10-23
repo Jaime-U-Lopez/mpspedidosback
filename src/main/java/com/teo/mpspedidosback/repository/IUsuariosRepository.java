@@ -10,4 +10,7 @@ public interface IUsuariosRepository extends JpaRepository<UsuariosEntity, Long>
 
 
     Optional<UsuariosEntity> findByUsuario(String usuario);
+
+
+
 }

@@ -3,6 +3,7 @@ package com.teo.mpspedidosback.controller;
 
 import com.teo.mpspedidosback.configuration.Constants;
 import com.teo.mpspedidosback.dto.PedidoCamEstadoDtoRequest;
+import com.teo.mpspedidosback.dto.UsuarioDtoResponse;
 import com.teo.mpspedidosback.dto.UsuarioValidacionDtoRequest;
 import com.teo.mpspedidosback.entity.ProductosEntity;
 import com.teo.mpspedidosback.entity.UsuariosEntity;
@@ -80,7 +81,7 @@ public class UsuariosController {
     }
 
     @GetMapping("usuario/{usuario}")
-    public ResponseEntity<UsuariosEntity> getUsuario(@PathVariable String usuario){
+    public ResponseEntity<UsuarioDtoResponse> getUsuarioByUsuario(@PathVariable String usuario){
 
         return ResponseEntity.ok(usuariosService.getfindByUsuario(usuario));
 

@@ -140,8 +140,6 @@ public class PedidosService implements IPedidosService {
         List<PedidosEntity>   pedidosEntityList= pedidosRepository.findByCodigoInterno( pedidoConfirmarDtoRequest.getCodigoInterno());
         List<PedidosEntity> pedidosEntityListUpdate = new ArrayList<>();
 
-
-
         for (PedidosEntity pedido :pedidosEntityList) {
 
             pedido.setPersonaContacto(pedidosConfiDtoRequest.getPersonaContacto());
@@ -164,22 +162,19 @@ public class PedidosService implements IPedidosService {
         }
 
         pedidosRepository.saveAll(pedidosEntityListUpdate);
-try {
-    PedidoEmailCarteraDtoRequest pedidoEmailCarteraDtoRequest =  new PedidoEmailCarteraDtoRequest ();
+        try {
+        PedidoEmailCarteraDtoRequest pedidoEmailCarteraDtoRequest =  new PedidoEmailCarteraDtoRequest ();
 
-    pedidoEmailCarteraDtoRequest.setCodigoInterno(pedidoConfirmarDtoRequest.getCodigoInterno());
-    pedidoEmailCarteraDtoRequest.setEstado(pedidoConfirmarDtoRequest.getEstado());
-    pedidoEmailCarteraDtoRequest.setCorreo("carteramatch@mps.com.co");
+        pedidoEmailCarteraDtoRequest.setCodigoInterno(pedidoConfirmarDtoRequest.getCodigoInterno());
+        pedidoEmailCarteraDtoRequest.setEstado(pedidoConfirmarDtoRequest.getEstado());
+        pedidoEmailCarteraDtoRequest.setCorreo("carteramatch@mps.com.co");
 
-    enviarCorreoCartera(pedidoEmailCarteraDtoRequest);
-}catch (Exception e){
+            enviarCorreoCartera(pedidoEmailCarteraDtoRequest);
+        }catch (Exception e){
 
-    throw new ExceptionGeneral("Error con el envio del correo a cartera "+ e.getMessage());
+            throw new ExceptionGeneral("Error con el envio del correo a cartera "+ e.getMessage());
 
-}
-        /*
-
-*/
+        }
 
     }
 
@@ -189,8 +184,11 @@ try {
         Long idCliente= pedidoDtoUpdateRequest.getIdCliente();
         String codigoInterno= pedidoDtoUpdateRequest.getCodigoInterno();
         String estado= pedidoDtoUpdateRequest.getEstado();
-        Integer numeroPedido=2;
+
         double porcentaIva=0.19;
+
+        List<PedidosEntity> pedidosEntityListActNumeroPed= pedidosRepository.findByCodigoInterno(codigoInterno);
+        Integer numeroPedido=pedidosEntityListActNumeroPed.get(0).getNumeroPedido();
         Optional<ClientesEntity>  clientesEntity =  clientesRepository.findByNit(idCliente);
         if(!clientesEntity.isPresent()){
             throw new ExceptionGeneral("El cliente no registra en la base de datos ");
@@ -355,12 +353,16 @@ try {
 
     @Override
     public void deleteByCodigoPedido(String codigo) {
-        pedidosRepository.deleteByCodigoInterno(codigo);
+        List<PedidosEntity>pedidosEntityList = pedidosRepository.findByCodigoInterno(codigo);
+
+        for (PedidosEntity pedidoEliminar : pedidosEntityList) {
+            pedidosRepository.delete(pedidoEliminar);
+        }
+
     }
 
     @Override
     public void enviarCorreo(PedidoCamEstadoDtoRequest pedidoCamEstadoDtoRequest) {
-
 
         Locale localeColombia = new Locale("es", "CO");
         NumberFormat formato = NumberFormat.getNumberInstance(localeColombia);
@@ -369,13 +371,19 @@ try {
         // Configurar el número de decimales deseados
         formato.setMaximumFractionDigits(2);
 
-        String correoAsesor=pedidoCamEstadoDtoRequest.getCorreoAsesor();
+
         String estado=  pedidoCamEstadoDtoRequest.getEstado();
         String correoCliente="";
+
+
+        String correoAsesor="";
+
 
         Integer orden=0;
 
          List<PedidosEntity> pedidosEntityList= pedidosRepository.findByCodigoInterno(pedidoCamEstadoDtoRequest.getCodigoInterno());
+
+
          List<PedidosEntity> savePedidosEntity= new ArrayList<>();
          List<PedidoEmailDtoResponse> productos = new ArrayList<>() ;
          List<PedidoEmailDBDtoResponse> datosBasicos = new ArrayList<>() ;
@@ -407,6 +415,7 @@ try {
             pedidoEmailDBDtoResponse.setValorTotal(pedidosEntity.getValorTotalPedido());
 
             correoCliente=pedidosEntity.getCorreoElectronico();
+            correoAsesor=pedidosEntity.getCorreoComercial();
 
             if (!datosBasicos.contains(pedidoEmailDBDtoResponse)) {
                 datosBasicos.add(pedidoEmailDBDtoResponse);
@@ -420,6 +429,7 @@ try {
             pedidoEmailDtoResponse.setNumerodeparte(pedidosEntity.getNumerodeparte());
             pedidoEmailDtoResponse.setNombreArticulo(pedidosEntity.getDescripcion());
             pedidoEmailDtoResponse.setValorUnitario(pedidosEntity.getValorUnitario());
+
             productos.add(pedidoEmailDtoResponse);
             //guardar nuevo estado
             savePedidosEntity.add(pedidosEntity);
@@ -494,8 +504,10 @@ try {
             Message emailMessage = emailService.createEmail(emailSession, emailEntity);
 
             List<String>destinatariosCco=new ArrayList<>();
-            destinatariosCco.add("ejecutivosmatch@mps.com.co");
 
+            if(estado.equals("aprobado") ){
+                destinatariosCco.add("ejecutivosmatch@mps.com.co");
+            }
 
 
             if(!correoAsesor.equals("") ){
@@ -548,7 +560,7 @@ try {
         List<PedidoEmailDtoResponse> productos = new ArrayList<>() ;
         List<PedidoEmailDBDtoResponse> datosBasicos = new ArrayList<>() ;
 
-try{
+    try{
     if(pedidosEntityList.isEmpty()){
         throw new ExceptionGeneral("El codigo Interno Proporcionado No posee registros ");
     }
@@ -730,12 +742,29 @@ try{
             }
         }
 
+            try {
+                Integer maxNumeroPedido = pedidosRepository.findMaxNumeroPedido();
+                if (maxNumeroPedido > 0) {
 
-        return pedidosUnicos.size();
+                    for (int i = maxNumeroPedido + 1; i <= maxNumeroPedido + 50; i++) {
+                        boolean existe = pedidosRepository.existsByNumeroPedido(i);
+                        if (!existe) {
+                            return i - 1;
+                        }
+                    }
+                }
+            }catch ( Exception e){
+
+                return 1;
+            }
+
+        return null;
     }
 
     @Override
     public List<PedidoAcumuladoDtoResponse> calcularSumaPedidosSuperiorAValor(Integer valor) {
+
+        //todo solamente sumar los aprobados
 
         List<PedidosEntity> pedidosEntityList = pedidosRepository.findAll();
         List<PedidoAcumuladoDtoResponse> resultados = new ArrayList<>();

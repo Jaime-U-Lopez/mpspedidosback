@@ -90,9 +90,9 @@ public class PedidosController {
     }
 
 
-    @DeleteMapping("codigo/{id}")
-    public ResponseEntity<Map<String, String>> deleteByCodigoControl(@Valid String  codigo) {
-        pedidosService.deleteByCodigoPedido(codigo);
+    @DeleteMapping("codigo/{codigoInterno}")
+    public ResponseEntity<Map<String, String>> deleteByCodigoInterno(@PathVariable String codigoInterno) {
+        pedidosService.deleteByCodigoPedido(codigoInterno);
         return ResponseEntity.ok(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.ENTIDAD_ElIMINADA_MENSAJE));
     }
 

@@ -53,7 +53,7 @@ public class PedidosEntity {
     private String preciominimousd;
     private String preciomaximousd;
     private String personaContacto;
-private String correoComercial;
+    private String correoComercial;
     private String formaDePago;
     public PedidosEntity() {
 

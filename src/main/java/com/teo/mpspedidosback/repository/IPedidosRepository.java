@@ -15,7 +15,10 @@ public interface IPedidosRepository extends JpaRepository<PedidosEntity, Long> {
     @Query("SELECT SUM(pe.valorTotalPedido) FROM PedidosEntity pe WHERE pe.valorTotalPedido > :valorLimite")
     List<PedidosEntity> calcularSumaPedidosSuperiorAValor(@Param("valorLimite") Double valorLimite);
 
+    boolean existsByNumeroPedido(Integer numeroPedido);
 
+    @Query("SELECT MAX(p.numeroPedido) FROM PedidosEntity p")
+    Integer findMaxNumeroPedido();
 
     void deleteByCodigoInterno(String codigoInterno);
 }

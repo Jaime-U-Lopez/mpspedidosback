@@ -1,6 +1,7 @@
 package com.teo.mpspedidosback.service;
 
 
+import com.teo.mpspedidosback.dto.UsuarioDtoResponse;
 import com.teo.mpspedidosback.dto.UsuarioValidacionDtoRequest;
 import com.teo.mpspedidosback.entity.GeneradorCodigoUnico;
 import com.teo.mpspedidosback.entity.ProductosEntity;
@@ -191,14 +192,19 @@ public class UsuariosService implements IUsuariosService {
     }
 
     @Override
-    public UsuariosEntity getfindByUsuario(String usuario) {
+    public UsuarioDtoResponse getfindByUsuario(String usuario) {
 
        Optional<UsuariosEntity> usuariosEntityOptional= usuariosRepository.findByUsuario(usuario);
      if(!usuariosEntityOptional.isPresent()) {
          throw new ExceptionGeneral("El usuario no registra en la base de datos");
      }
+        UsuarioDtoResponse  usuarioDtoResponse= new  UsuarioDtoResponse ();
 
-        return usuariosEntityOptional.get();
+        usuarioDtoResponse.setNombreUsuario(usuariosEntityOptional.get().getNombreUsuario());
+        usuarioDtoResponse.setRol(usuariosEntityOptional.get().getRol());
+        usuarioDtoResponse.setUsuario(usuariosEntityOptional.get().getUsuario());
+        
+        return usuarioDtoResponse;
     }
 
     @Override
