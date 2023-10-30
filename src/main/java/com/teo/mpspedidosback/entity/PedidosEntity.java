@@ -45,6 +45,7 @@ public class PedidosEntity {
     private String Stock;
     private Integer valorUnitario;
 
+
     private  Double valorNetoPorProd;
     private String evento;
     private  Long valorTotalPorPro;
@@ -64,7 +65,7 @@ public class PedidosEntity {
                          String numerodeparte, Integer cantidad,  String descripcion,
                          String marca, String color, String Stock, String clasificacionTributaria,
                          Integer numeroPedido, String tipoDeNegocio,String  preciominimocop,
-                         String preciominimousd, Double valorNetoPorProd ,Long  valorTotalPorPro) {
+                         String preciominimousd, Double valorNetoPorProd ,Long  valorTotalPorPro, String direccion) {
         this.nombreComercial = nombreComercial;
         this.dni = dni;
         this.valorUnitario=valorUnitario;
@@ -86,7 +87,7 @@ public class PedidosEntity {
         this.preciominimousd=preciominimousd;
         this.valorNetoPorProd=valorNetoPorProd;
         this.valorTotalPorPro=valorTotalPorPro;
-
+        this.direccion=direccion;
 
 
 
@@ -99,7 +100,7 @@ public class PedidosEntity {
                          String marca, String color, String Stock, String clasificacionTributaria,
                          Integer numeroPedido, String tipoDeNegocio,String  preciominimocop,
                          String preciominimousd, Double valorNetoPorProd ,Long  valorTotalPorPro,
-                         String correoComercial
+                         String correoComercial ,String direccion
 
                          ) {
         this.nombreComercial = nombreComercial;
@@ -124,7 +125,7 @@ public class PedidosEntity {
         this.valorNetoPorProd=valorNetoPorProd;
         this.valorTotalPorPro=valorTotalPorPro;
         this.correoComercial=correoComercial;
-
+        this.direccion=direccion;
 
 
     }

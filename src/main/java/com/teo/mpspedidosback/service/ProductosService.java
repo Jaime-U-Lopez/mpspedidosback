@@ -37,6 +37,10 @@ public class ProductosService implements IProductosService {
         productosRepository.save(productosEntity);
     }
 
+
+
+
+
     @Override
     public void cargarProductoPorPlano(MultipartFile archivo) throws IOException {
 
@@ -110,7 +114,6 @@ public class ProductosService implements IProductosService {
                                 registrosFallidos++;
                                 continue;
                             }
-
 
 
                             ProductosEntity producto = new ProductosEntity();
@@ -245,6 +248,11 @@ public class ProductosService implements IProductosService {
     @Override
     public void deleteProducto(Long codigo) {
         productosRepository.deleteById(codigo);
+    }
+
+    @Override
+    public List<ProductosEntity> getfindByNombreContaining(String numeroParte) {
+        return productosRepository.findByNumerodeparteContaining(numeroParte);
     }
 
     @Override

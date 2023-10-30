@@ -42,6 +42,8 @@ public class PedidoDtoResponse {
         private String preciominimousd;
         private  Double valorNetoPorProd;
         private  Long valorTotalPorPro;
+        private String observaciones;
+
 }
 
 

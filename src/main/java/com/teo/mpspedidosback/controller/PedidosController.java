@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 //@CrossOrigin(origins = "http://localhost:3000") // Reemplaza con la URL de tu aplicación React
@@ -97,12 +98,9 @@ public class PedidosController {
     }
 
     @GetMapping("consulta/valor/{valor}")
-    public ResponseEntity<List<PedidoAcumuladoDtoResponse>> consultaPorValorAcumulado(@Valid Integer valor ){
+    public ResponseEntity<List<PedidoAcumuladoConsultaDtoResponse>> consultaPorValorAcumulado(@Valid Integer valor ){
         return ResponseEntity.ok(pedidosService.calcularSumaPedidosSuperiorAValor(valor));
     }
-
-
-
 
 
 }

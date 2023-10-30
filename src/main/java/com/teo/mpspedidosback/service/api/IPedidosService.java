@@ -7,6 +7,7 @@ import com.teo.mpspedidosback.entity.ProductosEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 
 public interface IPedidosService {
@@ -30,6 +31,8 @@ public interface IPedidosService {
     void enviarCorreoCartera(PedidoEmailCarteraDtoRequest pedidoEmailCarteraDtoRequest);
 
     Integer conteoPedidos();
-    List<PedidoAcumuladoDtoResponse> calcularSumaPedidosSuperiorAValor(Integer valor);
+    List<PedidoAcumuladoConsultaDtoResponse> calcularSumaPedidosSuperiorAValor(Integer valor);
+
+
 
 }

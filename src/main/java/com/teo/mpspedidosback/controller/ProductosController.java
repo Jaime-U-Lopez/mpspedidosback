@@ -3,6 +3,7 @@ package com.teo.mpspedidosback.controller;
 
 
 import com.teo.mpspedidosback.dto.ProductosDtoResponse;
+import com.teo.mpspedidosback.entity.ClientesEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import com.teo.mpspedidosback.configuration.Constants;
 import com.teo.mpspedidosback.entity.ProductosEntity;
@@ -52,6 +53,14 @@ public class ProductosController {
         );
     }
 
+
+    @GetMapping("numeroParte/")
+    public ResponseEntity<List<ProductosEntity>> getProductoByNumeroParte(@Valid  String numeroParte){
+        return ResponseEntity.ok(productosService.getfindByNombreContaining(numeroParte));
+    }
+
+
+
     @GetMapping("/")
     public ResponseEntity<List<ProductosEntity>> getAllProductos(){
         return ResponseEntity.ok(productosService.getAllProducto());
@@ -59,9 +68,7 @@ public class ProductosController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductosEntity> getProducto(@PathVariable Long id){
-
         return ResponseEntity.ok(productosService.getProducto(id));
-
     }
 
     @GetMapping("/{marca}/{numeroParte}")
@@ -70,14 +77,12 @@ public class ProductosController {
             @PathVariable  String numeroParte ){
 
         List<ProductosEntity> productos = productosService.findByMarcaAndNumerodeparte(marca, numeroParte);
-
         if (productos.isEmpty()) {
             return ResponseEntity.notFound().build();
         } else {
             return ResponseEntity.ok(productos);
         }
     }
-
 
 
     @GetMapping("marcas/{marca}")
@@ -90,8 +95,6 @@ public class ProductosController {
         return ResponseEntity.ok(productosService.getfindByNumerodeparte(numeroParte));
     }
 
-
-
     @GetMapping("marcas/")
     public ResponseEntity<List<ProductosDtoResponse>> getMarcas(){
         return ResponseEntity.ok(productosService.getMarcaProducto());
@@ -103,9 +106,5 @@ public class ProductosController {
         productosService.deleteProducto(id);
         return ResponseEntity.ok(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.ENTIDAD_ElIMINADA_MENSAJE));
     }
-
-
-
-
 
 }

@@ -24,6 +24,10 @@ public interface IProductosService {
     List<ProductosDtoResponse> getMarcaProducto();
     List<ProductosEntity> findbyMarcaProducto(String marca);
     void deleteProducto(Long codigo);
+
+    List<ProductosEntity> getfindByNombreContaining(String numeroParte);
+
+
     void updateProducto(ProductosEntity productosEntity);
 
 
