@@ -38,15 +38,13 @@ public class Constants {
     public static final String NO_EXISTE_TIPO_ROL = "Error el Rol ingresado no existe entre las opciones de: CLIENTE - EMPLEADO - PROPIETARIO ";
     public static final String RESPONSE_MESSAGE_KEY = "mensaje";
     public static final String CREADO_PEDIDOS_INICIAL = "Creado satisfactoriamente el pedido exitosamente : ";
-    public static final String USUARIO_CREADOS_MENSAJE = "Creado satisfactoriamente los registros Existoso Usuarios: "+ UsuariosService.registrosExitosos + ", Fallidos sin crear : " +UsuariosService.registrosFallidos + ", Errores generdos : " + UsuariosService.errores;
+    public static final String USUARIO_CREADOS_MENSAJE = "Detalle : "+ " Fallidos sin crear : " +UsuariosService.registrosFallidos + ", Errores generados : " + UsuariosService.errores;
 
 
     public static final String PEDIDOS_UPDATE_CON_EXITO = "Pedidos actualizados con exito  ";
 
-    public static final String ENTIDAD_CREADO_MENSAJE = "Creado satisfactoriamente los registros Existoso Productos: "+ ProductosService.registrosExitosos + ", Fallidos sin crear : " +ProductosService.registrosFallidos + ", Errores generdos : " + ProductosService.errores;
-    public static final String ENTIDADES_CREADAS_MENSAJE = "Creado satisfactoriamente los registros Existoso Clientes: "+ ClientesService.registrosExitosos + ", Fallidos sin crear : " +ClientesService.registrosFallidos +
-            ", Errores generados:  "+ ClientesService.errores;
-
+    public static final String PRODUCTOS_CREADO_MENSAJE = "Detalle : "+  " Fallidos sin crear : " +ProductosService.registrosFallidos + ", Errores generados : " + ProductosService.errores;
+    public static final String ENTIDAD_CREADO_MENSAJE = "Entidad Creada Exitosamente  ";
 
     public static final String ENTIDAD_ElIMINADA_MENSAJE = "Eliminado satisfactoriamente.";
     public static final String USUARIO_YA_EXISTE_CORREO = "El correo con el que intenta crear el usuario ya se encuentra registrado.";

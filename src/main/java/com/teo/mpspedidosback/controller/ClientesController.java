@@ -1,6 +1,7 @@
 package com.teo.mpspedidosback.controller;
 
 
+import com.teo.mpspedidosback.service.ClientesService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -39,12 +40,14 @@ public class ClientesController {
     }
 
 
-
-    @PostMapping("/plano")
+    @CrossOrigin(origins = {"http://localhost:8082","http://192.190.42.51:8082"}, allowCredentials = "true")
+    @PostMapping("/cargar")
     public ResponseEntity<Map<String, String>> createClientesPorPlano(@RequestParam("archivo") MultipartFile archivo)throws IOException{
         clientesService.cargarClientesPorPlano(archivo);
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY,Constants.ENTIDADES_CREADAS_MENSAJE)
+                Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, ClientesService.registrosExitosos+  " Errores Clientes : "+ ClientesService.registrosFallidos+
+                        " Detalle :  Fallidos sin crear : " +ClientesService.registrosFallidos +
+                        " Errores generados : "+ ClientesService.errores)
         );
     }
 

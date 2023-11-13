@@ -31,8 +31,8 @@ import java.util.Optional;
 @Service
 public class UsuariosService implements IUsuariosService {
 
-    public static int registrosExitosos = 0;
-    public static int registrosFallidos = 0;
+    public static int registrosExitosos;
+    public static int registrosFallidos;
     public static List<String> errores = new ArrayList<>();
     @Autowired
     private IUsuariosRepository usuariosRepository;
@@ -71,7 +71,6 @@ public class UsuariosService implements IUsuariosService {
     public void cargarUsuariosPorPlano(MultipartFile archivo) throws IOException {
 
 
-        GeneradorCodigoUnico generadorCodigoUnico = new GeneradorCodigoUnico();
 
 
         List<UsuariosEntity> registrosTemporales = new ArrayList<>();
@@ -147,19 +146,20 @@ public class UsuariosService implements IUsuariosService {
                                 usuariosEntity.setRol(row.getCell(3).getStringCellValue());
 
 
-
+                                registrosExitosos+=1;
                                 registrosTemporales.add(usuariosEntity);
 
                             } else{
-                                errores.add("Error el usuario ya existe en la bd  fila :" +rowIndex );
                                 registrosFallidos++;
+                                errores.add("Error el usuario ya existe en la bd  fila :" +rowIndex );
+
                             }
 
 
                         }catch (Exception e){
-
-                            errores.add("Error al procesar la fila :" +rowIndex  + ": " + e.getMessage());
                             registrosFallidos++;
+                            errores.add("Error al procesar la fila :" +rowIndex  + ": " + e.getMessage());
+
 
                         }
                     }
@@ -167,7 +167,11 @@ public class UsuariosService implements IUsuariosService {
 
                     try {
                         usuariosRepository.saveAll(registrosTemporales);
-                        registrosExitosos+=registrosTemporales.size();
+                        if(registrosExitosos==0){
+
+                            registrosExitosos+=registrosTemporales.size();
+                        }
+
                     } catch (Exception e) {
                         // Manejar excepciones, por ejemplo, loguear el error
                         e.printStackTrace();
@@ -225,10 +229,6 @@ public class UsuariosService implements IUsuariosService {
             throw new ExceptionGeneral("El cliente no fue autenticado, valida usuario y password");
         }
 
-
-
     }
-
-
 
 }

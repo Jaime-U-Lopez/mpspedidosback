@@ -7,6 +7,7 @@ import com.teo.mpspedidosback.dto.UsuarioDtoResponse;
 import com.teo.mpspedidosback.dto.UsuarioValidacionDtoRequest;
 import com.teo.mpspedidosback.entity.ProductosEntity;
 import com.teo.mpspedidosback.entity.UsuariosEntity;
+import com.teo.mpspedidosback.service.UsuariosService;
 import com.teo.mpspedidosback.service.api.IProductosService;
 import com.teo.mpspedidosback.service.api.IUsuariosService;
 import jakarta.validation.Valid;
@@ -31,15 +32,23 @@ public class UsuariosController {
     @Autowired
     private IUsuariosService usuariosService;
 
-    @CrossOrigin(origins = "http://localhost:8082") // Reemplaza con la URL de tu aplicación React
+    //@CrossOrigin(origins = "http://localhost:8082") // Reemplaza con la URL de tu aplicación React
+    @CrossOrigin(origins = {"http://localhost:8082","http://192.190.42.51:8082"}, allowCredentials = "true")
     @PostMapping("/cargar")
-    public ResponseEntity<Map<String, String>> createProductoPorPlano(@RequestParam("archivo") MultipartFile archivo) throws IOException {
+    public ResponseEntity<Map<String, String>> createUsuariosPorPlano(@RequestParam("archivo") MultipartFile archivo) throws IOException {
 
-        usuariosService.cargarUsuariosPorPlano(archivo);
+        try {
+            usuariosService.cargarUsuariosPorPlano(archivo);
+            return ResponseEntity.status(HttpStatus.CREATED).body(
+                    Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, UsuariosService.registrosExitosos + " Errores Usuarios : "+UsuariosService.registrosFallidos +" " +
+                            "Detalle :  Fallidos sin crear : " +UsuariosService.registrosFallidos + ", Errores generados : " + UsuariosService.errores
+            ));
+        } catch (Exception e) {
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY,Constants.USUARIO_CREADOS_MENSAJE)
-        );
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, "Error al procesar la solicitud")
+            );
+        }
     }
 
 

@@ -13,7 +13,7 @@ public class PedidoDtoRequest {
     private List<ProductosDtoRequest> listaProductos;
     private String estado;
     private String codigoInterno;
-
+private String correoAsesor;
 
     public PedidoDtoRequest() {
     }

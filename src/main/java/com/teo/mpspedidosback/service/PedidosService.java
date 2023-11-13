@@ -46,7 +46,7 @@ public class PedidosService implements IPedidosService {
         Long idCliente = pedidoDtoRequest.getIdCliente();
         String codigoInterno = pedidoDtoRequest.getCodigoInterno();
         String estado = pedidoDtoRequest.getEstado();
-
+        String correoAsesor=pedidoDtoRequest.getCorreoAsesor();
 
         Integer numeroPedido = conteoPedidos() + 1;
         double porcentaIva = 0.19;
@@ -103,8 +103,6 @@ public class PedidosService implements IPedidosService {
                 String preciominimousd = productosEntity.get().getPreciominimousd();
 
 
-
-
                 PedidosEntity pedidosEntity = new PedidosEntity(nombreComercial, nit,
                         valorUnitario
                         , ivaPorPedido, estado,
@@ -116,15 +114,13 @@ public class PedidosService implements IPedidosService {
                         preciominimocop, preciominimousd, valorNetoPorProd, valorTotalPorPro,dirección
                 );
 
+                pedidosEntity.setCorreoComercial(correoAsesor);
                 pedidosEntityList.add(pedidosEntity);
             } catch (Exception e) {
                 throw new ExceptionGeneral("Nit  duplicado en la base de datos clientes o sin productos existen en bd " + e.getMessage());
             }
-
-
         }
         pedidosRepository.saveAll(pedidosEntityList);
-
     }
 
     @Override
@@ -773,8 +769,18 @@ public class PedidosService implements IPedidosService {
 
         for (PedidosEntity pedidos: pedidosEntityList) {
             String dni=pedidos.getDni().toString();
-            PedidosAcumulados pedidosAcumulados = new PedidosAcumulados(dni,pedidos.getNetoApagar(),pedidos.getCantidad(),pedidos.getNombreComercial());
-            listaPedidosAcumulados.add(pedidosAcumulados);
+
+            if(pedidos.getValorTotalPedido()!=null){
+                PedidosAcumulados pedidosAcumulados = new PedidosAcumulados(dni,pedidos.getValorTotalPedido(),pedidos.getCantidad(),pedidos.getNombreComercial());
+
+                   listaPedidosAcumulados.add(pedidosAcumulados);
+            }else{
+                PedidosAcumulados pedidosAcumulados = new PedidosAcumulados(dni,0.0,pedidos.getCantidad(),pedidos.getNombreComercial());
+                listaPedidosAcumulados.add(pedidosAcumulados);
+
+            }
+
+
         }
 
 
@@ -792,11 +798,9 @@ public class PedidosService implements IPedidosService {
 
     List<PedidoAcumuladoConsultaDtoResponse>  responsesList= new ArrayList<>();
 
-
-
             sumaTotalPorDNI.forEach((dni, total) -> {
 
-                if(total >= valor ){
+                if(total >= valor.doubleValue() ){
                     PedidoAcumuladoConsultaDtoResponse pedidoAcumuladoConsulta =new PedidoAcumuladoConsultaDtoResponse();
 
                     for (PedidosAcumulados pedidosAcumulados: listaPedidosAcumulados) {
@@ -809,18 +813,13 @@ public class PedidosService implements IPedidosService {
                     }
 
                     pedidoAcumuladoConsulta.setDni(dni);
-                    pedidoAcumuladoConsulta.setNetoApagar(sumaTotalPorDNI.get(dni));
+                    pedidoAcumuladoConsulta.setTotalPagado(sumaTotalPorDNI.get(dni));
                     pedidoAcumuladoConsulta.setUnidadesAcumuladas(sumaTotalUnidadesPorDNI.get(dni));
                     pedidoAcumuladoConsulta.setEstado("aprobado");
 
-
                     System.out.println(pedidoAcumuladoConsulta);
 
-
-
                     responsesList.add(pedidoAcumuladoConsulta);
-
-
 
                 }
 
@@ -829,164 +828,11 @@ public class PedidosService implements IPedidosService {
             });
 
 
-
-
-
-
-
     return responsesList;
 
 
     }
 
-
-    /*
-    @Override
-    public  List<PedidoAcumuladoConObjetDtoResponse> calcularSumaPedidosSuperiorAValor(Integer valor) {
-
-        Integer valorMinimo = valor;
-
-        List<PedidosEntity> pedidosEntityList = pedidosRepository.findAll();
-        List<PedidoAcumuladoDtoResponse> resultados = new ArrayList<>();
-        List<PedidoAcumuladoConsultaDtoResponse> consultaResponse = new ArrayList<>();
-
-        // Usar un mapa para mantener un seguimiento del valor neto acumulado por cédula
-        Map<String, Double> acumuladoPorCliente = new HashMap<>();
-
-
-        for (PedidosEntity pedidos : pedidosEntityList) {
-            boolean encontrado = false;
-
-            if(pedidos.getEstado().equals("aprobado") ) {
-                for (PedidoAcumuladoDtoResponse pedidoAcumulado : resultados) {
-                    if (pedidoAcumulado.getCodigoInterno().equals(pedidos.getCodigoInterno())) {
-                        pedidoAcumulado.setCantidad(pedidoAcumulado.getCantidad() + pedidos.getCantidad());
-                        encontrado = true;
-                        break;
-                    }
-                }
-
-                if (!encontrado) {
-                    // No se encontró un pedido acumulado con el mismo código interno, crea uno nuevo
-                    PedidoAcumuladoDtoResponse nuevoPedidoAcumulado = new PedidoAcumuladoDtoResponse();
-                    nuevoPedidoAcumulado.setCodigoInterno(pedidos.getCodigoInterno());
-                    nuevoPedidoAcumulado.setId(pedidos.getId());
-                    nuevoPedidoAcumulado.setDni(pedidos.getDni());
-                    nuevoPedidoAcumulado.setNombreComercial(pedidos.getNombreComercial());
-                    nuevoPedidoAcumulado.setFormaDePago(pedidos.getFormaDePago());
-                    nuevoPedidoAcumulado.setStock(pedidos.getStock());
-                    nuevoPedidoAcumulado.setNumeroPedido(pedidos.getNumeroPedido());
-                    nuevoPedidoAcumulado.setValorTotal(pedidos.getValorTotalPedido());
-                    nuevoPedidoAcumulado.setTotalIva(pedidos.getIvaTotalPed());
-                    nuevoPedidoAcumulado.setNetoApagar(pedidos.getNetoApagar());
-                    nuevoPedidoAcumulado.setEstado(pedidos.getEstado());
-                    nuevoPedidoAcumulado.setCantidad(pedidos.getCantidad());
-                    nuevoPedidoAcumulado.setFechaCreación(pedidos.getFechaCreacion());
-
-                    resultados.add(nuevoPedidoAcumulado);
-                }
-
-                // Realizar la acumulación por cliente
-                if (acumuladoPorCliente.containsKey(pedidos.getDni().toString())) {
-                    double acumulado = acumuladoPorCliente.get(pedidos.getDni().toString());
-                    acumulado += pedidos.getNetoApagar();
-                    acumuladoPorCliente.put(pedidos.getDni().toString(), acumulado);
-                } else {
-                    acumuladoPorCliente.put(pedidos.getDni().toString(), pedidos.getNetoApagar());
-                }
-
-            }
-
-        }
-        // Crear una lista de valores únicos por cliente
-        for (PedidoAcumuladoDtoResponse pedidoAcumulado : resultados) {
-            double acumuladoCliente = acumuladoPorCliente.getOrDefault(pedidoAcumulado.getDni().toString(), 0.0);
-
-            if (acumuladoCliente >= valorMinimo) {
-                PedidoAcumuladoConsultaDtoResponse consultaDtoResponse = new PedidoAcumuladoConsultaDtoResponse();
-                consultaDtoResponse.setDni(pedidoAcumulado.getDni());
-                consultaDtoResponse.setNombreComercial(pedidoAcumulado.getNombreComercial());
-                consultaDtoResponse.setNetoApagar(acumuladoCliente);
-                consultaResponse.add(consultaDtoResponse);
-            }
-        }
-
-
-        List<PedidoAcumuladoConObjetDtoResponse> consultaRespon = new ArrayList<>();
-
-
-
-
-        return    consultaRespon;
-
-
-    }
-
-
-     */
-
-
-/*
-
-
-    @Override
-    public Set<PedidoAcumuladoConsultaDtoResponse> calcularSumaPedidosSuperiorAValor(Integer valor) {
-
-        Integer valorMinimo = 100000;
-
-        //todo solamente sumar los aprobados
-        List<PedidosEntity> pedidosAprobados = pedidosRepository.findByEstado("aprobado");
-
-
-        // Usar un mapa para mantener un seguimiento del valor neto acumulado por cédula
-        Map<String, Double> acumuladoPorCodigoInterno = new HashMap<>();
-
-        // Crear un conjunto para almacenar los clientes que cumplen con el valor acumulado
-        Set<PedidoAcumuladoConsultaDtoResponse> clientesAprobadosConValorAcumuladoSuperior = new HashSet<>();
-
-        for (PedidosEntity pedido : pedidosAprobados) {
-            String codigoInterno = pedido.getCodigoInterno();
-            Double valorNeto = pedido.getNetoApagar();
-
-            if (acumuladoPorCodigoInterno.containsKey(codigoInterno)) {
-                // Si la cédula ya existe en el mapa, agregar el valor actual al acumulado
-                Double acumulado = acumuladoPorCodigoInterno.get(codigoInterno);
-                acumulado = valorNeto;
-
-                acumuladoPorCodigoInterno.put(codigoInterno, acumulado);
-            } else {
-                // Si la cédula no existe en el mapa, crear una nueva entrada con el valor actual
-
-
-                acumuladoPorCodigoInterno.put(codigoInterno, valorNeto);
-
-            }
-        }
-
-        // Iterar nuevamente para identificar los clientes que cumplen con el valor acumulado
-        for (PedidosEntity pedido : pedidosAprobados) {
-            String codigoInterno = pedido.getCodigoInterno();
-            Double acumulado = acumuladoPorCodigoInterno.get(codigoInterno);
-
-            if (acumulado > valorMinimo) {
-                // Crear una instancia de PedidoAcumuladoConsultaDtoResponse y agregarla al conjunto
-                PedidoAcumuladoConsultaDtoResponse clienteDto = new PedidoAcumuladoConsultaDtoResponse();
-                clienteDto.setDni(pedido.getDni());
-                clienteDto.setNombreComercial(pedido.getNombreComercial());
-                clienteDto.setEstado(pedido.getEstado());
-                clientesAprobadosConValorAcumuladoSuperior.add(clienteDto);
-                clienteDto.setNetoApagar(acumulado);
-
-
-
-            }
-        }
-
-        return clientesAprobadosConValorAcumuladoSuperior;
-
-
-    }
- */
 
 
 }

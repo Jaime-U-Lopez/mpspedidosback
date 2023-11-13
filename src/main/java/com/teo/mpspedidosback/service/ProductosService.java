@@ -3,6 +3,7 @@ package com.teo.mpspedidosback.service;
 
 import com.teo.mpspedidosback.dto.ProductosDtoResponse;
 import com.teo.mpspedidosback.entity.ProductosEntity;
+import com.teo.mpspedidosback.entity.UsuariosEntity;
 import com.teo.mpspedidosback.exception.ExceptionGeneral;
 import com.teo.mpspedidosback.repository.IProductosRepository;
 import com.teo.mpspedidosback.service.api.IProductosService;
@@ -26,8 +27,8 @@ import java.util.stream.Collectors;
 @Service
 public class ProductosService implements IProductosService {
 
-    public static int registrosExitosos = 0;
-    public static int registrosFallidos = 0;
+    public static int registrosExitosos;
+    public static int registrosFallidos;
     public static List<String> errores = new ArrayList<>();
     @Autowired
     private IProductosRepository productosRepository;
@@ -38,21 +39,16 @@ public class ProductosService implements IProductosService {
     }
 
 
-
-
-
     @Override
     public void cargarProductoPorPlano(MultipartFile archivo) throws IOException {
 
         List<ProductosEntity> registrosTemporales = new ArrayList<>();
-        if(registrosTemporales.size()>0) {
+        if (registrosTemporales.size() > 0) {
             registrosTemporales.clear();
         }
         String nombreArchivo = archivo.getOriginalFilename();
         String[] columnasEsperadas = {
-
                 "numerodeparte",
-
                 "descripcion",
                 "tipoDeNegocio",
                 "marca",
@@ -60,12 +56,10 @@ public class ProductosService implements IProductosService {
                 "clasificaciontributaria",
                 "moneda",
                 "stock",
-
                 "preciominimocop",
                 "preciominimousd",
-
         };
-        //para respuesta en error:
+
         String columnasEsperadasStr = String.join(", ", columnasEsperadas);
         Workbook workbook = null;
         try (InputStream inputStream = archivo.getInputStream()) {
@@ -91,47 +85,41 @@ public class ProductosService implements IProductosService {
                     columnasEnArchivo.add(cell.getStringCellValue());
                 }
                 if (Arrays.equals(columnasEsperadas, columnasEnArchivo.toArray(new String[0]))) {
-
-
-                    int rowIndex=0;
+                    int rowIndex = 0;
                     for (rowIndex = 0; rowIndex < sheet.getPhysicalNumberOfRows(); rowIndex++) {
-
                         try {
                             Row row = sheet.getRow(rowIndex);
                             if (row == null) {
                                 continue; // Salta la fila si es nula
                             }
                             if (row.getRowNum() == 0) {
-
                                 continue; // Salta la primera fila si es un encabezado
                             }
                             Cell cell0 = row.getCell(0);
                             Cell cell1 = row.getCell(1);
 
                             if (cell0 == null || cell1 == null) {
-                                // Puedes manejar el caso en el que una de las celdas sea nula, por ejemplo, lanzar una excepción o registrar un mensaje de error.
+                                // Puedes manejar el caso en el que una de las celdas sea nula,
+                                // por ejemplo, lanzar una excepción o registrar un mensaje de error.
                                 // Aquí, simplemente continuamos con la siguiente fila.
                                 registrosFallidos++;
                                 continue;
                             }
 
-
                             ProductosEntity producto = new ProductosEntity();
 
+                            String numeroParte = row.getCell(0).getStringCellValue();
 
-                            String numeroParte=row.getCell(0).getStringCellValue();
+                            Optional<ProductosEntity> productosEntities = productosRepository.findFirstByNumerodeparte(numeroParte);
 
-                         Optional<ProductosEntity> productosEntities= productosRepository.findFirstByNumerodeparte(numeroParte);
-
-                            if(!productosEntities.isPresent()){
-
+                            if (!productosEntities.isPresent()) {
                                 producto.setNumerodeparte(numeroParte);
 
                                 int maxLength = 255; // Longitud máxima permitida para la descripción
-                                String descripcion = row.getCell(1).getStringCellValue(); // Suponiendo que la descripción está en la columna 3
+                                String descripcion = row.getCell(1).getStringCellValue();
 
                                 if (descripcion.length() > maxLength) {
-                                    descripcion = descripcion.substring(0, maxLength); // Acorta el texto si supera la longitud máxima
+                                    descripcion = descripcion.substring(0, maxLength);
                                 }
 
                                 producto.setDescripcion(descripcion);
@@ -140,54 +128,43 @@ public class ProductosService implements IProductosService {
                                 producto.setColor(row.getCell(4).getStringCellValue());
                                 producto.setClasificaciontributaria(row.getCell(5).getStringCellValue());
                                 producto.setMoneda(row.getCell(6).getStringCellValue());
-
                                 producto.setStock(row.getCell(7).getStringCellValue());
-
                                 producto.setPreciominimocop(row.getCell(8).getStringCellValue());
-
                                 producto.setPreciominimousd(row.getCell(9).getStringCellValue());
-
-
+                                registrosExitosos+=1;
                                 registrosTemporales.add(producto);
 
-                            }else{
-                                errores.add("Error Numero de parte ya existe fila :" +rowIndex );
+                            } else {
+                                errores.add("Error Numero de parte ya existe fila :" + rowIndex);
                                 registrosFallidos++;
                             }
-
-
-                        }catch (Exception e){
-
-                            errores.add("Error al procesar la fila :" +rowIndex  + ": " + e.getMessage());
-                            registrosFallidos++;
-
-                        }
-                        }
-
-
-                        try {
-                            productosRepository.saveAll(registrosTemporales);
-                            registrosExitosos+=registrosTemporales.size();
                         } catch (Exception e) {
-                            // Manejar excepciones, por ejemplo, loguear el error
-                            e.printStackTrace();
+                            errores.add("Error al procesar la fila :" + rowIndex + ": " + e.getMessage());
                             registrosFallidos++;
-                            errores.add("Error al procesar la fila " + (registrosFallidos + registrosExitosos) + ": " + e.getMessage());
                         }
+                    }
 
+                    try {
 
+                        productosRepository.saveAll(registrosTemporales);
 
+                        if(registrosExitosos==0){
+
+                            registrosExitosos+=registrosTemporales.size();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        registrosFallidos++;
+                        errores.add("Error al procesar la fila " + (registrosFallidos + registrosExitosos) + ": " + e.getMessage());
+                    }
                 } else {
-                    // Los encabezados no coinciden, muestra un mensaje de error
                     throw new IllegalArgumentException("La estructura de las columnas no corresponde. Se esperaba: " + columnasEsperadasStr + " y el archivo tiene: " + String.join(", ", columnasEnArchivo));
-
-                }}
-
-            }catch(IOException e){
-                // Manejar errores de lectura del archivo
-                e.printStackTrace();
-                throw new RuntimeException("Error de lectura del archivo valida los campos ingresados", e);
+                }
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error de lectura del archivo valida los campos ingresados", e);
+        }
 
     }
 

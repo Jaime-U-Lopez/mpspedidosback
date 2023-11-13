@@ -13,9 +13,8 @@ public class PedidoAcumuladoConsultaDtoResponse {
 
         private String dni;
         private String nombreComercial;
-
         private String estado;
-        private Double netoApagar;
+        private Double totalPagado;
         private Integer unidadesAcumuladas;
 
 

@@ -4,6 +4,8 @@ package com.teo.mpspedidosback.controller;
 
 import com.teo.mpspedidosback.dto.ProductosDtoResponse;
 import com.teo.mpspedidosback.entity.ClientesEntity;
+import com.teo.mpspedidosback.service.ClientesService;
+import com.teo.mpspedidosback.service.ProductosService;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import com.teo.mpspedidosback.configuration.Constants;
 import com.teo.mpspedidosback.entity.ProductosEntity;
@@ -42,14 +44,17 @@ public class ProductosController {
     }
 
 
-
+    @CrossOrigin(origins = {"http://localhost:8082","http://192.190.42.51:8082"}, allowCredentials = "true")
     @PostMapping("/cargar")
     public ResponseEntity<Map<String, String>> createProductoPorPlano(@RequestParam("archivo") MultipartFile archivo) throws IOException {
 
         productosService.cargarProductoPorPlano(archivo);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY,Constants.ENTIDAD_CREADO_MENSAJE)
+                Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, ProductosService.registrosExitosos+  " Errores Productos : "+ ProductosService.registrosFallidos+
+                        " Detalle :  Fallidos sin crear : " +ProductosService.registrosFallidos + ", Errores generados : " + ProductosService.errores
+
+                        )
         );
     }
 
