@@ -12,50 +12,50 @@ import java.sql.Date;
 public class PedidosEntity {
 
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String nombreComercial;
-    private Long dni;
-    private Date fechaCreacion;
-    private String tipoDocumento;
-    private String direccion;
-    private String celular;
-    private String telefonoFijo;
-    private Integer numeroPedido;
-    private Double ivaPorProd;
-    private String clasificacionTributaria;
-    private String estado;
-    private String correoElectronico;
-    private String codigoInterno;
-    private Double valorTotalPedido;
-    private Double netoApagar;
-    private Double ivaTotalPed;
-    //productos
-    private String numerodeparte;
-    private Integer cantidad;
-    private Integer cantidadTotalPed;
-    private String descripcion;
-    private String tipoDeNegocio;
-    private String marca;
-    private String color;
-    private String observaciones;
-    private String moneda;
-    private String grupodeimpuestos;
-    private String Stock;
-    private Integer valorUnitario;
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+        private String nombreComercial;
+        private Long dni;
+        private Date fechaCreacion;
+        private String tipoDocumento;
+        private String direccion;
+        private String celular;
+        private String telefonoFijo;
+        private Integer numeroPedido;
+        private Double ivaPorProd;
+        private String clasificacionTributaria;
+        private String estado;
+        private String correoElectronico;
+        private String codigoInterno;
+        private Double valorTotalPedido;
+        private Double netoApagar;
+        private Double ivaTotalPed;
+        //productos
+        private String numerodeparte;
+        private Integer cantidad;
+        private Integer cantidadTotalPed;
+        private String descripcion;
+        private String tipoDeNegocio;
+        private String marca;
+        private String color;
+        private String observaciones;
+        private String moneda;
+        private String grupodeimpuestos;
+        private String Stock;
+        private Integer valorUnitario;
 
 
-    private  Double valorNetoPorProd;
-    private String evento;
-    private  Long valorTotalPorPro;
-    private String preciominimocop;
-    private String preciomaximocop;
-    private String preciominimousd;
-    private String preciomaximousd;
-    private String personaContacto;
-    private String correoComercial;
-    private String formaDePago;
+        private  Double valorNetoPorProd;
+        private String evento;
+        private  Long valorTotalPorPro;
+        private String preciominimocop;
+        private String preciomaximocop;
+        private String preciominimousd;
+        private String preciomaximousd;
+        private String personaContacto;
+        private String correoComercial;
+        private String formaDePago;
     public PedidosEntity() {
 
     }
@@ -88,8 +88,6 @@ public class PedidosEntity {
         this.valorNetoPorProd=valorNetoPorProd;
         this.valorTotalPorPro=valorTotalPorPro;
         this.direccion=direccion;
-
-
 
     }
 

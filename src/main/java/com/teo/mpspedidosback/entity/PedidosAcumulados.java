@@ -6,12 +6,17 @@ public class PedidosAcumulados {
     private double totalCompra;
     private int unidades;
     private String nombreCliente;
+    private Integer numeroPedido;
 
+    public Integer getNumeroPedido() {
+        return numeroPedido;
+    }
 
-    public PedidosAcumulados(String dni, double totalCompra, int unidades, String nombreCliente) {
+    public PedidosAcumulados(String dni, double totalCompra, int unidades, String nombreCliente, Integer numeroPedido) {
         this.dni = dni;
         this.totalCompra = totalCompra;
         this.unidades = unidades;
+        this.numeroPedido =numeroPedido;
         this.nombreCliente = nombreCliente;
     }
 

@@ -32,7 +32,7 @@ public class UsuariosController {
     @Autowired
     private IUsuariosService usuariosService;
 
-    //@CrossOrigin(origins = "http://localhost:8082") // Reemplaza con la URL de tu aplicación React
+
     @CrossOrigin(origins = {"http://localhost:8082","http://192.190.42.51:8082"}, allowCredentials = "true")
     @PostMapping("/cargar")
     public ResponseEntity<Map<String, String>> createUsuariosPorPlano(@RequestParam("archivo") MultipartFile archivo) throws IOException {

@@ -16,7 +16,7 @@ public class PedidoAcumuladoConsultaDtoResponse {
         private String estado;
         private Double totalPagado;
         private Integer unidadesAcumuladas;
-
+        private Long conteoPedidos;
 
 
 }

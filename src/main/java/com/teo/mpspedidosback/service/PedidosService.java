@@ -761,8 +761,8 @@ public class PedidosService implements IPedidosService {
     }
 
 
-    @Override
-    public  List<PedidoAcumuladoConsultaDtoResponse> calcularSumaPedidosSuperiorAValor(Integer valor) {
+
+    public  List<PedidoAcumuladoConsultaDtoResponse> calcularSumaPedidosSuperiorAValor2(Integer valor) {
 
      List<PedidosEntity> pedidosEntityList=  pedidosRepository.findByEstado("aprobado");
         ArrayList<PedidosAcumulados> listaPedidosAcumulados = new ArrayList<>();
@@ -771,11 +771,11 @@ public class PedidosService implements IPedidosService {
             String dni=pedidos.getDni().toString();
 
             if(pedidos.getValorTotalPedido()!=null){
-                PedidosAcumulados pedidosAcumulados = new PedidosAcumulados(dni,pedidos.getValorTotalPedido(),pedidos.getCantidad(),pedidos.getNombreComercial());
+                PedidosAcumulados pedidosAcumulados = new PedidosAcumulados(dni,pedidos.getValorTotalPedido(),pedidos.getCantidad(),pedidos.getNombreComercial(),pedidos.getNumeroPedido());
 
                    listaPedidosAcumulados.add(pedidosAcumulados);
             }else{
-                PedidosAcumulados pedidosAcumulados = new PedidosAcumulados(dni,0.0,pedidos.getCantidad(),pedidos.getNombreComercial());
+                PedidosAcumulados pedidosAcumulados = new PedidosAcumulados(dni,0.0,pedidos.getCantidad(),pedidos.getNombreComercial(),pedidos.getNumeroPedido());
                 listaPedidosAcumulados.add(pedidosAcumulados);
 
             }
@@ -809,21 +809,14 @@ public class PedidosService implements IPedidosService {
                             pedidoAcumuladoConsulta.setNombreComercial(pedidosAcumulados.getNombreCliente());
                             break;
                         }
-
                     }
-
                     pedidoAcumuladoConsulta.setDni(dni);
                     pedidoAcumuladoConsulta.setTotalPagado(sumaTotalPorDNI.get(dni));
                     pedidoAcumuladoConsulta.setUnidadesAcumuladas(sumaTotalUnidadesPorDNI.get(dni));
                     pedidoAcumuladoConsulta.setEstado("aprobado");
-
                     System.out.println(pedidoAcumuladoConsulta);
-
                     responsesList.add(pedidoAcumuladoConsulta);
-
                 }
-
-
 
             });
 
@@ -833,6 +826,72 @@ public class PedidosService implements IPedidosService {
 
     }
 
+    @Override
+    public  List<PedidoAcumuladoConsultaDtoResponse> calcularSumaPedidosSuperiorAValor(Integer valor) {
+
+        List<PedidosEntity> pedidosEntityList=  pedidosRepository.findByEstado("aprobado");
+        ArrayList<PedidosAcumulados> listaPedidosAcumulados = new ArrayList<>();
+
+        for (PedidosEntity pedidos: pedidosEntityList) {
+            String dni=pedidos.getDni().toString();
+
+            if(pedidos.getValorTotalPedido()!=null){
+                PedidosAcumulados pedidosAcumulados = new PedidosAcumulados(dni,pedidos.getValorTotalPedido(),pedidos.getCantidad(),pedidos.getNombreComercial(),pedidos.getNumeroPedido());
+
+                listaPedidosAcumulados.add(pedidosAcumulados);
+            }else{
+                PedidosAcumulados pedidosAcumulados = new PedidosAcumulados(dni,0.0,pedidos.getCantidad(),pedidos.getNombreComercial(),pedidos.getNumeroPedido());
+                listaPedidosAcumulados.add(pedidosAcumulados);
+            }
+
+        }
+
+
+        System.out.println("Suma total de compras por DNI usando HashMap:");
+
+        Map<String, Double> sumaTotalPorDNI = listaPedidosAcumulados.stream()
+                .collect(Collectors.groupingBy(PedidosAcumulados::getDni, Collectors.summingDouble(PedidosAcumulados::getTotalCompra)));
+
+        Map<String, Integer> sumaTotalUnidadesPorDNI = listaPedidosAcumulados.stream()
+                .collect(Collectors.groupingBy(PedidosAcumulados::getDni, Collectors.summingInt(PedidosAcumulados::getUnidades)));
+
+        Map<String, Long> contarNumPedidosPorDNI = listaPedidosAcumulados.stream()
+                .collect(Collectors.groupingBy(PedidosAcumulados::getDni, Collectors.mapping(PedidosAcumulados::getNumeroPedido, Collectors.counting())));
+
+        sumaTotalPorDNI.forEach((dni, total) -> System.out.println("DNI: " + dni + ", Suma total de compras: " + total));
+        sumaTotalUnidadesPorDNI.forEach((dni, totalUnidades) -> System.out.println("DNI: " + dni + ", Las cantidades totales son " + totalUnidades));
+
+
+        List<PedidoAcumuladoConsultaDtoResponse>  responsesList= new ArrayList<>();
+
+        sumaTotalPorDNI.forEach((dni, total) -> {
+
+            if(total >= valor.doubleValue() ){
+                PedidoAcumuladoConsultaDtoResponse pedidoAcumuladoConsulta =new PedidoAcumuladoConsultaDtoResponse();
+
+                for (PedidosAcumulados pedidosAcumulados: listaPedidosAcumulados) {
+
+                    if (dni.equals(pedidosAcumulados.getDni())){
+                        pedidoAcumuladoConsulta.setNombreComercial(pedidosAcumulados.getNombreCliente());
+                        break;
+                    }
+                }
+                pedidoAcumuladoConsulta.setDni(dni);
+                pedidoAcumuladoConsulta.setTotalPagado(sumaTotalPorDNI.get(dni));
+                pedidoAcumuladoConsulta.setUnidadesAcumuladas(sumaTotalUnidadesPorDNI.get(dni));
+                pedidoAcumuladoConsulta.setConteoPedidos(contarNumPedidosPorDNI.get(dni));
+                pedidoAcumuladoConsulta.setEstado("aprobado");
+                System.out.println(pedidoAcumuladoConsulta);
+                responsesList.add(pedidoAcumuladoConsulta);
+            }
+
+        });
+
+
+        return responsesList;
+
+
+    }
 
 
 }
